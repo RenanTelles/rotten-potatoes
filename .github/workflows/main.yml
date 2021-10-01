@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   
 jobs:
-  build:
+  CI:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,22 @@ jobs:
             rentelles/rotten-potatoes:lastest
             rentelles/rotten-potatoes:${{ github.run_number}}
 
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+  CD:
+    needs: [CI]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Kubernetes set context
+        uses: Azure/k8s-set-context@v1.1
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.K8S_CONFIG }}
+      
+      - name: Deploy to Kubernetes cluster
+        uses: Azure/k8s-deploy@v1.3
+        with:
+          images: rentelles/rotten-potatoes:${{ github.run_number}}
+          manifests: |
+            k8s/deployment.yaml
