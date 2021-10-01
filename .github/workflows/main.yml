@@ -20,8 +20,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER}}
           password: ${{ secrets.DOCKERHUB_PWD}}
 
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2.7.0
+        with:
+          context: ./src
+          file: ./src/Dockerfile
+          push: true
+          tags: |
+            rentelles/rotten-potatoes:lastest
+            rentelles/rotten-potatoes:${{ github.run_number}}
 
       - name: Run a multi-line script
         run: |
